@@ -9,10 +9,25 @@ const noteRoutes = require('./routes/noteRoutes');
 const app = express();
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CLIENT_URL
+].filter(Boolean); // Remove undefined values
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'], // Allow both Vite and CRA default ports
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like Postman) or if in the list
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
+
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
